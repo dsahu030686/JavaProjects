@@ -36,7 +36,8 @@ public class TaskExecutorImpl implements TaskExecutor {
     @Override
     public <T> Future<T> submitTask(Task<T> task) {
     	// Check if the semaphore for the task execution is already present, else if create a new semaphore
-        Semaphore semaphore = taskGroupSemaphores.computeIfAbsent(task.taskGroup(), group -> new Semaphore(1));
+    	// Fairness policy is set to true so that the long waiting thread can acquire the task.
+        Semaphore semaphore = taskGroupSemaphores.computeIfAbsent(task.taskGroup(), group -> new Semaphore(1, true));
         return executorService.submit(() -> {
             try {
             	// Waits until it acquires a lock on the semaphore, if other thread has acquired the lock
